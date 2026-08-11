@@ -1,0 +1,141 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id                  String          @id @default(cuid())
+  email               String          @unique
+  name                String?
+  passwordHash        String
+  role                String          @default("USER")
+  failedLoginAttempts Int             @default(0)
+  lockedUntil         DateTime?
+  lastLoginAt         DateTime?
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+  sessions            Session[]
+  companyProfile      CompanyProfile?
+  clients             Client[]
+  invoices            Invoice[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+}
+
+model CompanyProfile {
+  id             String   @id @default(cuid())
+  userId         String   @unique
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name           String   // e.g. "RENDERS ARC"
+  tagline        String?  // e.g. "THE POWER TO MANIFEST"
+  addressLine1   String?  // e.g. "3rd Flr 60/44 JC Chambers Panampily Nagar"
+  addressLine2   String?  // e.g. "Opp Kairali Flat, Panampilly Nagar"
+  city           String?  // e.g. "Kochi, Ernakulam"
+  state          String?  // e.g. "Kerala"
+  pincode        String?  // e.g. "682036"
+  country        String?  @default("India")
+  gstin          String?  // e.g. "32DLOPR0998L1Z9"
+  email          String?
+  phone          String?
+  bankName       String?  // e.g. "HDFC Bank"
+  accountName    String?  // e.g. "RENDERS ARC"
+  accountNo      String?  // e.g. "50200110640651"
+  ifscCode       String?  // e.g. "HDFC0001218"
+  micrCode       String?  // e.g. "682240018"
+  branchCode     String?  // e.g. "1218"
+  signatory      String?  // e.g. "Rajat"
+  signatoryTitle String?  // e.g. "Renders Arc"
+  logoUrl        String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Client {
+  id           String    @id @default(cuid())
+  userId       String
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name         String    // e.g. "KREEM FOODS PRIVATE LIMITED"
+  addressLine1 String?
+  addressLine2 String?
+  city         String?
+  state        String?
+  pincode      String?
+  country      String?   @default("India")
+  gstin        String?   // e.g. "32AAACK8728L2ZA"
+  email        String?
+  phone        String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  invoices     Invoice[]
+}
+
+model Invoice {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  clientId      String?
+  client        Client?  @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  invoiceNumber String   // e.g. "RA/SKEI/001"
+  invoiceDate   DateTime
+  dueDate       DateTime?
+  status        String   @default("PENDING") // PENDING, PAID, DRAFT, CANCELLED
+  subject       String?  // e.g. "Tax Invoice - SKEI Hidden Locations Platform"
+
+  clientName    String
+  clientAddress String
+  clientGstin   String?
+
+  subtotal     Float
+  cgstRate     Float    @default(9.0)
+  cgstAmount   Float    @default(0.0)
+  sgstRate     Float    @default(9.0)
+  sgstAmount   Float    @default(0.0)
+  igstRate     Float    @default(0.0)
+  igstAmount   Float    @default(0.0)
+  totalAmount  Float
+  totalInWords String?
+
+  bankName    String?
+  accountName String?
+  accountNo   String?
+  ifscCode    String?
+  micrCode    String?
+  branchCode  String?
+  signatory   String?
+  notes       String?
+
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  items     InvoiceItem[]
+}
+
+model InvoiceItem {
+  id          String   @id @default(cuid())
+  invoiceId   String
+  invoice     Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  itemNumber  Int      @default(1)
+  description String
+  hsnSac      String?  // e.g. "998314"
+  quantity    Float    @default(1.0)
+  rate        Float    @default(0.0)
+  cgstRate    Float    @default(9.0)
+  cgstAmount  Float    @default(0.0)
+  sgstRate    Float    @default(9.0)
+  sgstAmount  Float    @default(0.0)
+  igstRate    Float    @default(0.0)
+  igstAmount  Float    @default(0.0)
+  amount      Float    @default(0.0)
+}
