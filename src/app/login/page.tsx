@@ -56,18 +56,23 @@ export default function LoginPage() {
         <div style={{ textAlign: "center", marginBottom: "28px" }}>
           <div
             style={{
-              width: "52px",
-              height: "52px",
-              borderRadius: "10px",
+              width: "64px",
+              height: "64px",
+              borderRadius: "14px",
+              overflow: "hidden",
+              margin: "0 auto 16px",
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
               background: "#0f172a",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              margin: "0 auto 16px",
-              color: "#ffffff",
             }}
           >
-            <ShieldCheck size={28} />
+            <img
+              src="/icon.jpg"
+              alt="Renders Arc Logo"
+              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            />
           </div>
           <h1
             style={{

@@ -52,15 +52,16 @@ export default function Navigation({ userName }: { userName?: string }) {
             style={{
               width: '34px',
               height: '34px',
-              borderRadius: '6px',
+              borderRadius: '8px',
+              overflow: 'hidden',
               background: '#0f172a',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: '#fff',
+              flexShrink: 0,
             }}
           >
-            <ShieldCheck size={20} />
+            <img src="/icon.jpg" alt="Renders Arc Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           </div>
           <div>
             <div style={{ fontWeight: 800, fontFamily: 'var(--font-heading)', fontSize: '1.1rem', color: '#0f172a', letterSpacing: '0.05em' }}>
