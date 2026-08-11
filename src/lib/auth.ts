@@ -8,7 +8,7 @@ const JWT_SECRET_KEY = new TextEncoder().encode(
 );
 
 const MAX_FAILED_ATTEMPTS = 5;
-const LOCKOUT_MINUTES = 15;
+const LOCKOUT_MINUTES = 60;
 
 export interface SessionPayload {
   userId: string;
