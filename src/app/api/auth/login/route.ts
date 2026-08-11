@@ -15,20 +15,25 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { email, password } = body;
+    const loginInput = (body.email || body.username || '').toLowerCase().trim();
+    const { password } = body;
 
-    if (!email || !password) {
-      return NextResponse.json({ error: 'Email and password are required.' }, { status: 400 });
+    if (!loginInput || !password) {
+      return NextResponse.json({ error: 'Username/Email and password are required.' }, { status: 400 });
     }
 
-    const normalizedEmail = email.toLowerCase().trim();
-
-    const user = await prisma.user.findUnique({
-      where: { email: normalizedEmail },
+    const user = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { email: loginInput },
+          ...(loginInput === 'admin' ? [{ email: 'admin@rendersarc.com' }] : []),
+          ...(loginInput === 'admin@rendersarc.com' ? [{ email: 'admin' }] : []),
+        ],
+      },
     });
 
     if (!user) {
-      return NextResponse.json({ error: 'Invalid email or password.' }, { status: 401 });
+      return NextResponse.json({ error: 'Invalid username/email or password.' }, { status: 401 });
     }
 
     // Check account lockout

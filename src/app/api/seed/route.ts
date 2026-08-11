@@ -5,8 +5,8 @@ import { convertNumberToIndianWords } from '@/lib/number-to-words';
 
 export async function GET() {
   try {
-    const demoEmail = process.env.ADMIN_EMAIL || 'admin@rendersarc.com';
-    const demoPassword = process.env.ADMIN_PASSWORD || 'adminpassword123';
+    const demoEmail = process.env.ADMIN_EMAIL || 'admin';
+    const demoPassword = process.env.ADMIN_PASSWORD || 'admin';
 
     let user = await prisma.user.findUnique({
       where: { email: demoEmail },

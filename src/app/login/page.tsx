@@ -2,11 +2,11 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ShieldCheck, Lock, Mail, AlertCircle, ArrowRight } from "lucide-react";
+import { ShieldCheck, Lock, User, AlertCircle, ArrowRight } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -20,7 +20,7 @@ export default function LoginPage() {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ username, password }),
       });
 
       const data = await res.json();
@@ -120,10 +120,10 @@ export default function LoginPage() {
                 marginBottom: "6px",
               }}
             >
-              Email Address
+              Username
             </label>
             <div style={{ position: "relative" }}>
-              <Mail
+              <User
                 size={18}
                 style={{
                   position: "absolute",
@@ -133,13 +133,13 @@ export default function LoginPage() {
                 }}
               />
               <input
-                type="email"
+                type="text"
                 required
                 className="glass-input"
                 style={{ paddingLeft: "40px" }}
-                placeholder="admin@rendersarc.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                placeholder="admin"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
               />
             </div>
           </div>
