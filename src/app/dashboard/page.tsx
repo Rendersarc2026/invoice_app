@@ -16,8 +16,6 @@ import {
   Eye,
   Trash2,
   Edit,
-  Zap,
-  Sparkles,
 } from 'lucide-react';
 
 interface Invoice {
@@ -76,24 +74,6 @@ export default function DashboardPage() {
 
   const removeToast = (id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
-  };
-
-  const handleSeedDemo = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch('/api/seed');
-      const data = await res.json();
-      if (res.ok && data.sampleInvoiceId) {
-        addToast('success', 'Renders Arc sample invoice generated!');
-        router.push(`/invoices/${data.sampleInvoiceId}`);
-      } else {
-        await fetchInvoices();
-      }
-    } catch (err) {
-      addToast('error', 'Failed to seed demo invoice.');
-    } finally {
-      setLoading(false);
-    }
   };
 
   const handleConfirmDelete = async () => {
@@ -168,10 +148,6 @@ export default function DashboardPage() {
           </div>
 
           <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-            <button onClick={handleSeedDemo} className="btn-secondary">
-              <Zap size={15} />
-              <span>Load Renders Arc PDF Demo</span>
-            </button>
             <Link href="/invoices/new" className="btn-primary">
               <Plus size={16} />
               <span>Create Invoice</span>
@@ -282,12 +258,9 @@ export default function DashboardPage() {
               <FileText size={40} color="#cbd5e1" style={{ margin: '0 auto 12px' }} />
               <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: '#0f172a' }}>No Invoices Found</h3>
               <p style={{ color: '#64748b', fontSize: '0.875rem', marginTop: '4px', marginBottom: '18px' }}>
-                {search ? 'Try adjusting your search criteria.' : 'Get started by creating your first tax invoice or load the demo.'}
+                {search ? 'Try adjusting your search criteria.' : 'Get started by creating your first tax invoice.'}
               </p>
               <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
-                <button onClick={handleSeedDemo} className="btn-secondary">
-                  <Sparkles size={15} /> Load Demo Invoice
-                </button>
                 <Link href="/invoices/new" className="btn-primary">
                   <Plus size={15} /> Create Invoice
                 </Link>

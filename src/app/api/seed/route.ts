@@ -5,8 +5,8 @@ import { convertNumberToIndianWords } from '@/lib/number-to-words';
 
 export async function GET() {
   try {
-    const demoEmail = 'admin@rendersarc.com';
-    const demoPassword = 'Password123!';
+    const demoEmail = process.env.ADMIN_EMAIL || 'admin@rendersarc.com';
+    const demoPassword = process.env.ADMIN_PASSWORD || 'adminpassword123';
 
     let user = await prisma.user.findUnique({
       where: { email: demoEmail },
@@ -128,7 +128,7 @@ export async function GET() {
       });
     }
 
-    // Create session & set cookie so user is logged in automatically when seeding
+    // Create session & set cookie
     const session = await prisma.session.create({
       data: {
         userId: user.id,
@@ -146,7 +146,7 @@ export async function GET() {
 
     const response = NextResponse.json({
       success: true,
-      message: 'Database seeded successfully with sample user and Renders Arc invoice!',
+      message: 'Database seeded successfully on Supabase PostgreSQL with admin user and Renders Arc invoice!',
       credentials: {
         email: demoEmail,
         password: demoPassword,

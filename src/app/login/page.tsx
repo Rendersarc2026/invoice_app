@@ -2,15 +2,13 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { ShieldCheck, Lock, Mail, AlertCircle, ArrowRight, Zap } from 'lucide-react';
+import { ShieldCheck, Lock, Mail, AlertCircle, ArrowRight } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [seeding, setSeeding] = useState(false);
   const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -37,25 +35,6 @@ export default function LoginPage() {
     } catch (err: any) {
       setError('An unexpected error occurred.');
       setLoading(false);
-    }
-  };
-
-  const handleDemoLogin = async () => {
-    setSeeding(true);
-    setError('');
-    try {
-      const seedRes = await fetch('/api/seed');
-      const seedData = await seedRes.json();
-
-      if (seedRes.ok) {
-        router.push(`/invoices/${seedData.sampleInvoiceId}`);
-      } else {
-        setError(seedData.error || 'Failed to initialize demo data.');
-        setSeeding(false);
-      }
-    } catch (err) {
-      setError('Failed to seed demo data.');
-      setSeeding(false);
     }
   };
 
@@ -184,42 +163,6 @@ export default function LoginPage() {
             <ArrowRight size={18} />
           </button>
         </form>
-
-        <div style={{ margin: '20px 0', textAlign: 'center', position: 'relative' }}>
-          <hr style={{ border: 'none', borderTop: '1px solid #e2e8f0' }} />
-          <span
-            style={{
-              position: 'absolute',
-              top: '-9px',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              background: '#ffffff',
-              padding: '0 10px',
-              fontSize: '0.75rem',
-              color: '#94a3b8',
-            }}
-          >
-            OR
-          </span>
-        </div>
-
-        <button
-          type="button"
-          onClick={handleDemoLogin}
-          disabled={seeding}
-          className="btn-secondary"
-          style={{ width: '100%', justifyContent: 'center', padding: '11px', color: '#0f172a', fontWeight: 600 }}
-        >
-          <Zap size={16} />
-          {seeding ? 'Generating Sample Invoice...' : 'One-Click Demo Login'}
-        </button>
-
-        <div style={{ textAlign: 'center', marginTop: '20px', fontSize: '0.85rem', color: '#64748b' }}>
-          Don&apos;t have an account?{' '}
-          <Link href="/register" style={{ color: '#0f172a', fontWeight: 700 }}>
-            Register Now
-          </Link>
-        </div>
       </div>
     </div>
   );
