@@ -1,11 +1,31 @@
 import { NextResponse } from 'next/server';
+import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
-import { hashPassword, validatePasswordStrength, signSessionToken } from '@/lib/auth';
-import { checkRateLimit } from '@/lib/rate-limit';
+import { hashPassword, validatePasswordStrength, createSession, setAuthCookie } from '@/lib/auth';
+import { checkRateLimit, getClientIp } from '@/lib/rate-limit';
+import { validationErrorResponse } from '@/lib/api-errors';
+
+/**
+ * Self-service signup is off unless explicitly enabled. The app ships as a
+ * private portal (/register redirects to /login), so an open registration
+ * endpoint would let anyone create a tenant.
+ */
+const REGISTRATION_ENABLED = process.env.ALLOW_REGISTRATION === 'true';
+
+const registerSchema = z.object({
+  name: z.string().trim().min(2, 'Name must be at least 2 characters long').max(100),
+  email: z.email('A valid email address is required').max(200),
+  password: z.string().min(8, 'Password must be at least 8 characters long').max(200),
+});
 
 export async function POST(req: Request) {
+  if (!REGISTRATION_ENABLED) {
+    // 404 rather than 403: don't advertise a disabled endpoint.
+    return NextResponse.json({ error: 'Not found.' }, { status: 404 });
+  }
+
   try {
-    const ip = req.headers.get('x-forwarded-for') || '127.0.0.1';
+    const ip = getClientIp(req);
     const rateCheck = checkRateLimit(`register:${ip}`, 5, 60000);
     if (!rateCheck.allowed) {
       return NextResponse.json(
@@ -15,21 +35,19 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { name, email, password } = body;
-
-    if (!email || !password || !name) {
-      return NextResponse.json({ error: 'Name, email, and password are required.' }, { status: 400 });
+    const parsed = registerSchema.safeParse(body);
+    if (!parsed.success) {
+      return validationErrorResponse(parsed.error);
     }
 
-    const normalizedEmail = email.toLowerCase().trim();
+    const { name, password } = parsed.data;
+    const normalizedEmail = parsed.data.email.toLowerCase().trim();
 
-    // Check password strength
     const passwordCheck = validatePasswordStrength(password);
     if (!passwordCheck.valid) {
       return NextResponse.json({ error: passwordCheck.message }, { status: 400 });
     }
 
-    // Check existing user
     const existingUser = await prisma.user.findUnique({
       where: { email: normalizedEmail },
     });
@@ -60,36 +78,16 @@ export async function POST(req: Request) {
       },
     });
 
-    // Create session
-    const session = await prisma.session.create({
-      data: {
-        userId: user.id,
-        token: Math.random().toString(36).substring(2) + Date.now().toString(36),
-        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
-        ipAddress: ip,
-        userAgent: req.headers.get('user-agent'),
-      },
-    });
-
-    const token = await signSessionToken({
-      userId: user.id,
-      email: user.email,
-      role: user.role,
-      sessionId: session.id,
+    const token = await createSession(user, {
+      ipAddress: ip,
+      userAgent: req.headers.get('user-agent'),
     });
 
     const response = NextResponse.json({ success: true, user });
-
-    response.cookies.set('auth_token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
-      maxAge: 86400,
-    });
+    setAuthCookie(response, token);
 
     return response;
-  } catch (error: any) {
+  } catch (error) {
     console.error('Registration error:', error);
     return NextResponse.json({ error: 'Internal server error during registration.' }, { status: 500 });
   }

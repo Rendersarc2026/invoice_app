@@ -9,27 +9,29 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
 
-  const [name, setName] = useState('RENDERS ARC');
-  const [tagline, setTagline] = useState('THE POWER TO MANIFEST');
-  const [addressLine1, setAddressLine1] = useState('3rd Flr 60/44 JC Chambers Panampily Nagar');
-  const [addressLine2, setAddressLine2] = useState('Opp Kairali Flat, Panampilly Nagar');
-  const [city, setCity] = useState('Kochi, Ernakulam');
-  const [state, setState] = useState('Kerala');
-  const [pincode, setPincode] = useState('682036');
+  // Fields start empty and are filled from /api/company, so one account's bank
+  // details are never rendered as another account's defaults.
+  const [name, setName] = useState('');
+  const [tagline, setTagline] = useState('');
+  const [addressLine1, setAddressLine1] = useState('');
+  const [addressLine2, setAddressLine2] = useState('');
+  const [city, setCity] = useState('');
+  const [state, setState] = useState('');
+  const [pincode, setPincode] = useState('');
   const [country, setCountry] = useState('India');
-  const [gstin, setGstin] = useState('32DLOPR0998L1Z9');
-  const [email, setEmail] = useState('contact@rendersarc.com');
-  const [phone, setPhone] = useState('+91 98765 43210');
+  const [gstin, setGstin] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
 
-  const [bankName, setBankName] = useState('HDFC Bank');
-  const [accountName, setAccountName] = useState('RENDERS ARC');
-  const [accountNo, setAccountNo] = useState('50200110640651');
-  const [ifscCode, setIfscCode] = useState('HDFC0001218');
-  const [micrCode, setMicrCode] = useState('682240018');
-  const [branchCode, setBranchCode] = useState('1218');
+  const [bankName, setBankName] = useState('');
+  const [accountName, setAccountName] = useState('');
+  const [accountNo, setAccountNo] = useState('');
+  const [ifscCode, setIfscCode] = useState('');
+  const [micrCode, setMicrCode] = useState('');
+  const [branchCode, setBranchCode] = useState('');
 
-  const [signatory, setSignatory] = useState('Rajat');
-  const [signatoryTitle, setSignatoryTitle] = useState('Renders Arc');
+  const [signatory, setSignatory] = useState('');
+  const [signatoryTitle, setSignatoryTitle] = useState('');
 
   useEffect(() => {
     fetchProfile();

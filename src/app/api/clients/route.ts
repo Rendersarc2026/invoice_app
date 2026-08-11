@@ -1,10 +1,12 @@
 import { NextResponse } from 'next/server';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { clientSchema } from '@/lib/validations/company';
+import { unauthorized, validationErrorResponse } from '@/lib/api-errors';
 
 export async function GET() {
   const user = await getAuthenticatedUser();
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!user) return unauthorized();
 
   const clients = await prisma.client.findMany({
     where: { userId: user.id },
@@ -16,29 +18,35 @@ export async function GET() {
 
 export async function POST(req: Request) {
   const user = await getAuthenticatedUser();
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!user) return unauthorized();
 
-  const body = await req.json();
+  try {
+    const parsed = clientSchema.safeParse(await req.json());
+    if (!parsed.success) {
+      return validationErrorResponse(parsed.error);
+    }
 
-  if (!body.name) {
-    return NextResponse.json({ error: 'Client name is required.' }, { status: 400 });
+    const data = parsed.data;
+
+    const client = await prisma.client.create({
+      data: {
+        userId: user.id,
+        name: data.name,
+        addressLine1: data.addressLine1,
+        addressLine2: data.addressLine2,
+        city: data.city,
+        state: data.state,
+        pincode: data.pincode,
+        country: data.country || 'India',
+        gstin: data.gstin,
+        email: data.email,
+        phone: data.phone,
+      },
+    });
+
+    return NextResponse.json(client, { status: 201 });
+  } catch (error) {
+    console.error('Client creation error:', error);
+    return NextResponse.json({ error: 'Internal server error while creating client.' }, { status: 500 });
   }
-
-  const client = await prisma.client.create({
-    data: {
-      userId: user.id,
-      name: body.name,
-      addressLine1: body.addressLine1,
-      addressLine2: body.addressLine2,
-      city: body.city,
-      state: body.state,
-      pincode: body.pincode,
-      country: body.country || 'India',
-      gstin: body.gstin,
-      email: body.email,
-      phone: body.phone,
-    },
-  });
-
-  return NextResponse.json(client, { status: 201 });
 }

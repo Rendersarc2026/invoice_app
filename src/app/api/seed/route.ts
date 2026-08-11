@@ -1,23 +1,67 @@
 import { NextResponse } from 'next/server';
+import { timingSafeEqual } from 'node:crypto';
 import { prisma } from '@/lib/prisma';
-import { hashPassword, signSessionToken } from '@/lib/auth';
+import { hashPassword, validatePasswordStrength } from '@/lib/auth';
 import { convertNumberToIndianWords } from '@/lib/number-to-words';
 
-export async function GET() {
+/**
+ * Seeding is an administrative action, not a login.
+ *
+ * This route previously answered unauthenticated GETs by creating a session and
+ * setting an auth cookie on the caller, which made it a one-click admin login
+ * (and, via a cross-site <img>, a session-fixation vector). It now requires a
+ * POST carrying a shared secret, never issues a cookie, and never echoes
+ * credentials back.
+ */
+function isAuthorized(req: Request): boolean {
+  const expected = process.env.SEED_SECRET;
+  // No secret configured => the route is inert.
+  if (!expected) return false;
+
+  const provided = req.headers.get('x-seed-secret') || '';
+  const expectedBuf = Buffer.from(expected);
+  const providedBuf = Buffer.from(provided);
+
+  if (expectedBuf.length !== providedBuf.length) return false;
+  return timingSafeEqual(expectedBuf, providedBuf);
+}
+
+export async function POST(req: Request) {
+  if (!isAuthorized(req)) {
+    return NextResponse.json({ error: 'Not found.' }, { status: 404 });
+  }
+
   try {
-    const demoEmail = process.env.ADMIN_EMAIL || 'admin';
-    const demoPassword = process.env.ADMIN_PASSWORD || 'admin';
+    const adminEmail = process.env.ADMIN_EMAIL;
+    const adminPassword = process.env.ADMIN_PASSWORD;
+
+    if (!adminEmail || !adminPassword) {
+      return NextResponse.json(
+        { error: 'ADMIN_EMAIL and ADMIN_PASSWORD must be set to seed an admin user.' },
+        { status: 400 }
+      );
+    }
+
+    // No 'admin'/'admin' fallback: a seeded account must satisfy the same
+    // password policy as any registered one.
+    const passwordCheck = validatePasswordStrength(adminPassword);
+    if (!passwordCheck.valid) {
+      return NextResponse.json(
+        { error: `ADMIN_PASSWORD is too weak: ${passwordCheck.message}` },
+        { status: 400 }
+      );
+    }
 
     let user = await prisma.user.findUnique({
-      where: { email: demoEmail },
+      where: { email: adminEmail.toLowerCase().trim() },
       include: { companyProfile: true },
     });
 
     if (!user) {
-      const passwordHash = await hashPassword(demoPassword);
+      const passwordHash = await hashPassword(adminPassword);
       user = await prisma.user.create({
         data: {
-          email: demoEmail,
+          email: adminEmail.toLowerCase().trim(),
           name: 'Rajat',
           passwordHash,
           companyProfile: {
@@ -46,7 +90,6 @@ export async function GET() {
       });
     }
 
-    // Check if client Kreem Foods exists
     let client = await prisma.client.findFirst({
       where: { userId: user.id, name: 'KREEM FOODS PRIVATE LIMITED' },
     });
@@ -69,7 +112,6 @@ export async function GET() {
       });
     }
 
-    // Check if sample invoice exists
     let invoice = await prisma.invoice.findFirst({
       where: { userId: user.id, invoiceNumber: 'RA/SKEI/001' },
     });
@@ -85,7 +127,8 @@ export async function GET() {
           userId: user.id,
           clientId: client.id,
           clientName: client.name,
-          clientAddress: 'No-46/1914/A, AKG Vayanasala CrossRoad, Chakkaraparambu,\nThammanam\nErnakulam\n682032 Kerala\nIndia',
+          clientAddress:
+            'No-46/1914/A, AKG Vayanasala CrossRoad, Chakkaraparambu,\nThammanam\nErnakulam\n682032 Kerala\nIndia',
           clientGstin: client.gstin,
           invoiceNumber: 'RA/SKEI/001',
           invoiceDate: new Date('2026-07-30'),
@@ -128,43 +171,14 @@ export async function GET() {
       });
     }
 
-    // Create session & set cookie
-    const session = await prisma.session.create({
-      data: {
-        userId: user.id,
-        token: Math.random().toString(36).substring(2) + Date.now().toString(36),
-        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
-      },
-    });
-
-    const token = await signSessionToken({
-      userId: user.id,
-      email: user.email,
-      role: user.role,
-      sessionId: session.id,
-    });
-
-    const response = NextResponse.json({
+    // Deliberately returns no credentials and sets no session cookie.
+    return NextResponse.json({
       success: true,
-      message: 'Database seeded successfully on Supabase PostgreSQL with admin user and Renders Arc invoice!',
-      credentials: {
-        email: demoEmail,
-        password: demoPassword,
-      },
+      message: 'Database seeded. Sign in normally at /login.',
       sampleInvoiceId: invoice.id,
     });
-
-    response.cookies.set('auth_token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
-      maxAge: 86400,
-    });
-
-    return response;
-  } catch (error: any) {
+  } catch (error) {
     console.error('Seed error:', error);
-    return NextResponse.json({ error: error.message || 'Seed error' }, { status: 500 });
+    return NextResponse.json({ error: 'Seed failed.' }, { status: 500 });
   }
 }

@@ -55,10 +55,12 @@ export default function InvoiceViewPage({ params }: { params: Promise<{ id: stri
   const handleStatusChange = async (newStatus: string) => {
     setUpdating(true);
     try {
+      // PATCH sends only the status, instead of echoing the whole fetched
+      // invoice back to the server.
       const res = await fetch(`/api/invoices/${id}`, {
-        method: 'PUT',
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...invoice, status: newStatus }),
+        body: JSON.stringify({ status: newStatus }),
       });
       if (res.ok) {
         const updated = await res.json();

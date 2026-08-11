@@ -1,38 +1,40 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { jwtVerify } from 'jose';
+import { verifySessionToken } from '@/lib/auth';
 
-const JWT_SECRET_KEY = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'fallback-super-secret-jwt-key-min-32-chars-long'
-);
+/**
+ * First gate in front of the app shell: unauthenticated requests to app pages
+ * are redirected to /login instead of rendering a shell that then 401s on its
+ * own data fetches.
+ *
+ * This checks the JWT signature only — no database round-trip. Route handlers
+ * still call getAuthenticatedUser(), which additionally verifies the session row
+ * (revocation, expiry, lockout). Treat this as UX-level gating, not the
+ * authorization boundary.
+ */
+const PROTECTED_PREFIXES = ['/dashboard', '/invoices', '/clients', '/settings'];
 
-export async function proxy(req: NextRequest) {
-  const token = req.cookies.get('auth_token')?.value;
-  const { pathname } = req.nextUrl;
+export async function proxy(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  const token = request.cookies.get('auth_token')?.value;
+  const payload = token ? await verifySessionToken(token) : null;
 
-  let isAuthenticated = false;
-  if (token) {
-    try {
-      await jwtVerify(token, JWT_SECRET_KEY);
-      isAuthenticated = true;
-    } catch {
-      isAuthenticated = false;
-    }
+  const isProtected = PROTECTED_PREFIXES.some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)
+  );
+
+  if (isProtected && !payload) {
+    const loginUrl = new URL('/login', request.url);
+    return NextResponse.redirect(loginUrl);
   }
 
-  // If authenticated user visits login, register, or root -> redirect to dashboard
-  if (isAuthenticated && (pathname === '/login' || pathname === '/register' || pathname === '/')) {
-    return NextResponse.redirect(new URL('/dashboard', req.url));
-  }
-
-  // If unauthenticated user visits protected routes -> redirect to login
-  if (!isAuthenticated && (pathname.startsWith('/dashboard') || pathname.startsWith('/invoices') || pathname.startsWith('/clients') || pathname.startsWith('/settings'))) {
-    return NextResponse.redirect(new URL('/login', req.url));
+  if (pathname === '/login' && payload) {
+    return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ['/', '/login', '/register', '/dashboard/:path*', '/invoices/:path*', '/clients/:path*', '/settings/:path*'],
+  matcher: ['/dashboard/:path*', '/invoices/:path*', '/clients/:path*', '/settings/:path*', '/login'],
 };
