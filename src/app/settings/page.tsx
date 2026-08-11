@@ -169,7 +169,7 @@ export default function SettingsPage() {
               </h2>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+            <div className="grid-2-col">
               <div>
                 <label style={{ fontSize: '0.78rem', color: '#475569', marginBottom: '4px', display: 'block', fontWeight: 600 }}>
                   Company Name (Invoice Header)
@@ -212,7 +212,7 @@ export default function SettingsPage() {
                 <input type="text" value={addressLine2} onChange={(e) => setAddressLine2(e.target.value)} className="glass-input" />
               </div>
 
-              <div style={{ gridColumn: '1 / -1', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '10px' }}>
+              <div style={{ gridColumn: '1 / -1' }} className="grid-4-col">
                 <div>
                   <label style={{ fontSize: '0.75rem', color: '#475569', marginBottom: '4px', display: 'block' }}>City</label>
                   <input type="text" value={city} onChange={(e) => setCity(e.target.value)} className="glass-input" />
@@ -279,7 +279,7 @@ export default function SettingsPage() {
               </h2>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+            <div className="grid-2-col">
               <div>
                 <label style={{ fontSize: '0.78rem', color: '#475569', marginBottom: '4px', display: 'block', fontWeight: 600 }}>Signatory Name</label>
                 <input type="text" value={signatory} onChange={(e) => setSignatory(e.target.value)} className="glass-input" />

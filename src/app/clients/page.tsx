@@ -93,23 +93,8 @@ export default function ClientsPage() {
 
         {/* Add Modal */}
         {showAddModal && (
-          <div
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              background: 'rgba(15, 23, 42, 0.4)',
-              backdropFilter: 'blur(4px)',
-              zIndex: 100,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: '24px',
-            }}
-          >
-            <div className="glass-card" style={{ width: '100%', maxWidth: '500px', padding: '24px' }}>
+          <div className="modal-overlay">
+            <div className="modal-content glass-card" style={{ maxWidth: '500px' }}>
               <h2 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#0f172a', marginBottom: '18px' }}>
                 Add New Client
               </h2>
@@ -155,7 +140,7 @@ export default function ClientsPage() {
                   />
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
+                <div className="grid-3-col">
                   <div>
                     <label style={{ fontSize: '0.75rem', color: '#475569', marginBottom: '4px', display: 'block' }}>City</label>
                     <input type="text" value={city} onChange={(e) => setCity(e.target.value)} className="glass-input" placeholder="Ernakulam" />
@@ -170,7 +155,7 @@ export default function ClientsPage() {
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                <div className="grid-2-col">
                   <div>
                     <label style={{ fontSize: '0.75rem', color: '#475569', marginBottom: '4px', display: 'block' }}>Email</label>
                     <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="glass-input" placeholder="accounts@client.com" />

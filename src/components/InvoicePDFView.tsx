@@ -166,42 +166,44 @@ export default function InvoicePDFView({ invoice }: { invoice: InvoiceData }) {
       )}
 
       {/* Tax Invoice Table */}
-      <table className="invoice-table">
-        <thead>
-          <tr>
-            <th style={{ width: '4%' }}>#</th>
-            <th style={{ width: '32%' }}>Item & Description</th>
-            <th style={{ width: '10%', textAlign: 'center' }}>HSN/SAC</th>
-            <th style={{ width: '6%', textAlign: 'right' }}>Qty</th>
-            <th style={{ width: '12%', textAlign: 'right' }}>Rate</th>
-            <th style={{ width: '6%', textAlign: 'right' }}>CGST %</th>
-            <th style={{ width: '10%', textAlign: 'right' }}>CGST Amt</th>
-            <th style={{ width: '6%', textAlign: 'right' }}>SGST %</th>
-            <th style={{ width: '10%', textAlign: 'right' }}>SGST Amt</th>
-            <th style={{ width: '12%', textAlign: 'right' }}>Amount</th>
-          </tr>
-        </thead>
-        <tbody>
-          {invoice.items.map((item, idx) => (
-            <tr key={idx}>
-              <td style={{ verticalAlign: 'top', color: '#4b5563' }}>{item.itemNumber || idx + 1}</td>
-              <td style={{ verticalAlign: 'top', fontWeight: 500, color: '#111827', whiteSpace: 'pre-line' }}>
-                {item.description}
-              </td>
-              <td style={{ verticalAlign: 'top', textAlign: 'center', color: '#374151' }}>{item.hsnSac || '-'}</td>
-              <td style={{ verticalAlign: 'top', textAlign: 'right', color: '#374151' }}>{item.quantity.toFixed(2)}</td>
-              <td style={{ verticalAlign: 'top', textAlign: 'right', color: '#374151' }}>{formatCurrency(item.rate)}</td>
-              <td style={{ verticalAlign: 'top', textAlign: 'right', color: '#374151' }}>{item.cgstRate}%</td>
-              <td style={{ verticalAlign: 'top', textAlign: 'right', color: '#374151' }}>{formatCurrency(item.cgstAmount)}</td>
-              <td style={{ verticalAlign: 'top', textAlign: 'right', color: '#374151' }}>{item.sgstRate}%</td>
-              <td style={{ verticalAlign: 'top', textAlign: 'right', color: '#374151' }}>{formatCurrency(item.sgstAmount)}</td>
-              <td style={{ verticalAlign: 'top', textAlign: 'right', fontWeight: 600, color: '#111827' }}>
-                {formatCurrency(item.amount)}
-              </td>
+      <div className="table-responsive">
+        <table className="invoice-table">
+          <thead>
+            <tr>
+              <th style={{ width: '4%' }}>#</th>
+              <th style={{ width: '32%' }}>Item & Description</th>
+              <th style={{ width: '10%', textAlign: 'center' }}>HSN/SAC</th>
+              <th style={{ width: '6%', textAlign: 'right' }}>Qty</th>
+              <th style={{ width: '12%', textAlign: 'right' }}>Rate</th>
+              <th style={{ width: '6%', textAlign: 'right' }}>CGST %</th>
+              <th style={{ width: '10%', textAlign: 'right' }}>CGST Amt</th>
+              <th style={{ width: '6%', textAlign: 'right' }}>SGST %</th>
+              <th style={{ width: '10%', textAlign: 'right' }}>SGST Amt</th>
+              <th style={{ width: '12%', textAlign: 'right' }}>Amount</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {invoice.items.map((item, idx) => (
+              <tr key={idx}>
+                <td style={{ verticalAlign: 'top', color: '#4b5563' }}>{item.itemNumber || idx + 1}</td>
+                <td style={{ verticalAlign: 'top', fontWeight: 500, color: '#111827', whiteSpace: 'pre-line' }}>
+                  {item.description}
+                </td>
+                <td style={{ verticalAlign: 'top', textAlign: 'center', color: '#374151' }}>{item.hsnSac || '-'}</td>
+                <td style={{ verticalAlign: 'top', textAlign: 'right', color: '#374151' }}>{item.quantity.toFixed(2)}</td>
+                <td style={{ verticalAlign: 'top', textAlign: 'right', color: '#374151' }}>{formatCurrency(item.rate)}</td>
+                <td style={{ verticalAlign: 'top', textAlign: 'right', color: '#374151' }}>{item.cgstRate}%</td>
+                <td style={{ verticalAlign: 'top', textAlign: 'right', color: '#374151' }}>{formatCurrency(item.cgstAmount)}</td>
+                <td style={{ verticalAlign: 'top', textAlign: 'right', color: '#374151' }}>{item.sgstRate}%</td>
+                <td style={{ verticalAlign: 'top', textAlign: 'right', color: '#374151' }}>{formatCurrency(item.sgstAmount)}</td>
+                <td style={{ verticalAlign: 'top', textAlign: 'right', fontWeight: 600, color: '#111827' }}>
+                  {formatCurrency(item.amount)}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
       {/* Totals Summary */}
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 24, marginBottom: 24 }}>

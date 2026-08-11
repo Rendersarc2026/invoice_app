@@ -474,8 +474,8 @@ export default function EditInvoicePage({ params }: { params: Promise<{ id: stri
                   marginBottom: '14px',
                 }}
               >
-                <div style={{ display: 'grid', gridTemplateColumns: '3fr 1fr 1fr 1fr 1fr 1fr auto', gap: '10px', alignItems: 'flex-start' }}>
-                  <div style={{ gridColumn: '1 / span 7' }}>
+                <div className="grid-3-col" style={{ alignItems: 'flex-start' }}>
+                  <div style={{ gridColumn: '1 / -1' }}>
                     <label style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '3px', display: 'block' }}>Description *</label>
                     <textarea
                       rows={2}

@@ -30,32 +30,15 @@ export default function ConfirmModal({
 
   return (
     <div
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        background: 'rgba(15, 23, 42, 0.45)',
-        backdropFilter: 'blur(4px)',
-        zIndex: 150,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '24px',
-      }}
+      className="modal-overlay"
       onClick={(e) => {
         if (e.target === e.currentTarget) onCancel();
       }}
     >
       <div
-        className="glass-card"
+        className="modal-content glass-card"
         style={{
-          width: '100%',
           maxWidth: '440px',
-          padding: '24px',
-          borderRadius: '12px',
-          boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
           position: 'relative',
         }}
       >

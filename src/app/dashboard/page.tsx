@@ -267,7 +267,7 @@ export default function DashboardPage() {
               </div>
             </div>
           ) : (
-            <div style={{ overflowX: 'auto' }}>
+            <div className="table-responsive">
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem', textAlign: 'left' }}>
                 <thead>
                   <tr style={{ borderBottom: '1px solid #e2e8f0', background: '#f8fafc', color: '#64748b', fontSize: '0.725rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
