@@ -16,7 +16,7 @@ export default function Navigation({ userName }: { userName?: string }) {
 
   const handleLogout = async () => {
     await fetch('/api/auth/logout', { method: 'POST' });
-    router.push('/login');
+    router.replace('/login');
   };
 
   const navItems = [
